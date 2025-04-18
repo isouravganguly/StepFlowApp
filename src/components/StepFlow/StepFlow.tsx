@@ -21,13 +21,16 @@ export const StepFlow: React.FC<StepFlowProps> = ({
     handleNext,
     canGoBack,
     canGoNext,
-    isProcessing,
   } = useStepFlow(steps, onComplete, onError);
 
   return (
     <View style={styles.container}>
       <StatusBar barStyle="light-content" />
-      {renderHeader ? renderHeader(progress) : <ProgressBar progress={progress} />}
+      {renderHeader ? (
+        renderHeader(progress)
+      ) : (
+        <ProgressBar progress={progress} />
+      )}
       <QuestionScreen
         step={currentStep}
         selectedOptions={answers[currentStep.id] || []}
@@ -35,7 +38,6 @@ export const StepFlow: React.FC<StepFlowProps> = ({
         onBack={canGoBack ? handleBack : undefined}
         onNext={canGoNext ? handleNext : undefined}
         renderTile={renderTile}
-        isProcessing={isProcessing}
       />
     </View>
   );

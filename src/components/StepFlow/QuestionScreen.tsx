@@ -1,6 +1,5 @@
 import React, {useCallback} from 'react';
 import {View, Text, StyleSheet, FlatList, Pressable} from 'react-native';
-import Animated, {FadeIn} from 'react-native-reanimated';
 import {Step, Option} from './types';
 import OptionTile from './OptionTile';
 
@@ -11,7 +10,6 @@ type QuestionScreenProps = {
   onBack?: () => void;
   onNext?: () => void;
   renderTile?: (option: Option, isSelected: boolean) => React.ReactNode;
-  isProcessing?: boolean;
 };
 
 const QuestionScreen: React.FC<QuestionScreenProps> = ({
@@ -21,7 +19,6 @@ const QuestionScreen: React.FC<QuestionScreenProps> = ({
   onBack,
   onNext,
   renderTile,
-  isProcessing,
 }) => {
   const renderItem = useCallback(
     ({item}: {item: Option}) => (
@@ -31,10 +28,9 @@ const QuestionScreen: React.FC<QuestionScreenProps> = ({
         isSelected={selectedOptions.includes(item.id)}
         onSelect={() => onOptionSelect(item.id)}
         customRender={renderTile}
-        isProcessing={isProcessing}
       />
     ),
-    [selectedOptions, onOptionSelect, renderTile, isProcessing],
+    [selectedOptions, onOptionSelect, renderTile],
   );
 
   return (
@@ -45,9 +41,7 @@ const QuestionScreen: React.FC<QuestionScreenProps> = ({
         </Pressable>
       </View>
 
-      <Animated.Text entering={FadeIn.duration(400)} style={styles.question}>
-        {step.question}
-      </Animated.Text>
+      <Text style={styles.question}>{step.question}</Text>
 
       <FlatList
         data={step.options}
@@ -61,10 +55,10 @@ const QuestionScreen: React.FC<QuestionScreenProps> = ({
       <Pressable
         style={[
           styles.nextButton,
-          (!selectedOptions.length || isProcessing) && styles.nextButtonDisabled,
+          !selectedOptions.length && styles.nextButtonDisabled,
         ]}
         onPress={onNext}
-        disabled={!selectedOptions.length || isProcessing}>
+        disabled={!selectedOptions.length}>
         <Text style={styles.nextButtonText}>NEXT</Text>
       </Pressable>
     </View>
