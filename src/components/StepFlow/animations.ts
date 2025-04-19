@@ -1,41 +1,33 @@
-import { Dimensions } from 'react-native';
-import {
-  withSpring,
-  WithSpringConfig,
-} from 'react-native-reanimated';
-import { AnimationConfig } from './types';
+import {withTiming} from 'react-native-reanimated';
 
-const { width } = Dimensions.get('window');
-
-export const springConfig: WithSpringConfig = {
-  damping: 20,
-  stiffness: 90,
-  mass: 1,
-  overshootClamping: false,
-  restDisplacementThreshold: 0.01,
-  restSpeedThreshold: 2,
-};
-
-export const slideInRight = (): AnimationConfig => {
+export const questionTransition = (direction: 'left' | 'right') => {
   'worklet';
+  const multiplier = direction === 'left' ? 1 : -1;
+  
   return {
-    initialValues: {
-      transform: [{ translateX: width }],
+    entering: () => {
+      'worklet';
+      return {
+        transform: [{
+          translateX: withTiming(0, {
+            duration: 300,
+          }, () => {
+            'worklet';
+          }),
+        }],
+        opacity: withTiming(1, {duration: 300}),
+      };
     },
-    animations: {
-      transform: [{ translateX: withSpring(0, springConfig) }],
-    },
-  };
-};
-
-export const slideOutLeft = (): AnimationConfig => {
-  'worklet';
-  return {
-    initialValues: {
-      transform: [{ translateX: 0 }],
-    },
-    animations: {
-      transform: [{ translateX: withSpring(-width, springConfig) }],
+    exiting: () => {
+      'worklet';
+      return {
+        transform: [{
+          translateX: withTiming(300 * multiplier, {
+            duration: 300,
+          }),
+        }],
+        opacity: withTiming(0, {duration: 300}),
+      };
     },
   };
 };
