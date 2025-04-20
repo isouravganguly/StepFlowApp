@@ -93,7 +93,6 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-start',
     alignItems: 'center',
     paddingHorizontal: 10,
-    paddingTop: 10,
     height: 50,
   },
   backButton: {
