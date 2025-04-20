@@ -1,3 +1,4 @@
+// StepFlow use-case: This component is used to render the options in the QuestionScreen.
 import React, {memo} from 'react';
 import {Pressable, Text, StyleSheet} from 'react-native';
 import Animated, {useAnimatedStyle, withSpring} from 'react-native-reanimated';

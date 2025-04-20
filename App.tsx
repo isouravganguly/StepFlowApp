@@ -1,60 +1,222 @@
-import React from 'react';
-import {SafeAreaView, StyleSheet} from 'react-native';
-import 'react-native-reanimated';
-import StepFlow from './src/components/StepFlow/StepFlow';
-import {Step} from './src/components/StepFlow/types';
+import React, {useState} from 'react';
+import {
+  StyleSheet,
+  ActivityIndicator,
+  Text,
+  // TouchableOpacity, // No longer needed here
+} from 'react-native';
+import StepFlow from './src/features/StepFlow/StepFlow';
+import ResultsScreen from './src/features/Results/ResultsScreen';
+import {stepFlowService} from './src/services/stepFlowService';
+import {Step, StepFlowResult} from './src/components/StepFlow/types';
+import HomeScreen from './src/screens/HomeScreen';
+// Import new components
+import ScreenContainer from './src/components/common/ScreenContainer';
+import StyledButton from './src/components/common/StyledButton';
 
-const sampleSteps: Step[] = [
-  {
-    id: 'experience',
-    question: 'How many years of coding experience do you have?',
-    type: 'single' as const,
-    options: [
-      {id: 'junior', label: '0-2 years'},
-      {id: 'mid', label: '2-5 years'},
-      {id: 'senior', label: '5+ years'},
-    ],
-  },
-  {
-    id: 'frameworks',
-    question: 'Which frameworks do you use regularly?',
-    type: 'multi' as const,
-    options: [
-      {id: 'react', label: 'React'},
-      {id: 'vue', label: 'Vue'},
-      {id: 'angular', label: 'Angular'},
-      {id: 'svelte', label: 'Svelte'},
-    ],
-  },
-  {
-    id: 'preferred_stack',
-    question: 'Whats your preferred mobile stack?',
-    type: 'single' as const,
-    options: [
-      {id: 'rn', label: 'React Native'},
-      {id: 'flutter', label: 'Flutter'},
-      {id: 'native', label: 'Native (iOS/Android)'},
-    ],
-  },
-];
+// Placeholder User ID - REMOVED - Replace with actual user management later
+// const USER_ID = 'testUser123';
+// TODO: Implement authentication and retrieve actual user ID
 
-function App(): React.JSX.Element {
-  const handleComplete = (results: Record<string, string[]>) => {
-    console.log('Survey completed!', results);
+// Type for the cache
+type TestConfigCache = {
+  [key: string]: Step[];
+};
+
+const App = () => {
+  const [testConfig, setTestConfig] = useState<Step[] | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [finalAnswers, setFinalAnswers] = useState<StepFlowResult | null>(null);
+  const [resultsSteps, setResultsSteps] = useState<Step[] | null>(null);
+  // Add state for caching configurations
+  const [cachedConfigs, setCachedConfigs] = useState<TestConfigCache>({});
+
+  const fetchAndStartTest = async (testId: 'HAIR' | 'SKIN') => {
+    setError(null);
+    setFinalAnswers(null);
+    setTestConfig(null);
+    setResultsSteps(null);
+
+    // Check cache first
+    if (cachedConfigs[testId]) {
+      console.log(`Using cached config for ${testId}`);
+      setTestConfig(cachedConfigs[testId]);
+      return; // Exit early if cached
+    }
+
+    // If not cached, proceed to fetch
+    console.log(`Fetching config for ${testId} from Firebase...`);
+    setIsLoading(true);
+    try {
+      const config = await stepFlowService.getTestConfiguration(testId);
+      if (config) {
+        setTestConfig(config);
+        // Store in cache
+        setCachedConfigs(prevCache => ({
+          ...prevCache,
+          [testId]: config,
+        }));
+      } else {
+        setError(`Could not load configuration for ${testId} test.`);
+      }
+    } catch (err) {
+      setError(
+        err instanceof Error
+          ? err.message
+          : 'An unknown error occurred fetching config.',
+      );
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  return (
-    <SafeAreaView style={styles.container}>
-      <StepFlow steps={sampleSteps} onComplete={handleComplete} />
-    </SafeAreaView>
-  );
-}
+  // Use this revised handler
+  const handleCompleteRevised = async (result: StepFlowResult) => {
+    console.log('StepFlow completed:', result);
+    setFinalAnswers(result); // Store answers to show results screen
+    setResultsSteps(testConfig); // Store the steps used for the results screen
+    setTestConfig(null); // Clear the active test config
+
+    // TODO: Get the actual authenticated user ID here
+    const currentUserId = null; // Replace null with actual user ID retrieval logic
+
+    if (currentUserId) {
+      setIsLoading(true); // Show loading while saving
+      try {
+        // Pass the actual userId to the service
+        await stepFlowService.saveAnswers(currentUserId, result);
+      } catch (saveError) {
+        console.error('Failed to save results:', saveError);
+        // Show error, but still proceed to show results
+        // Consider more specific error feedback based on saveError type
+        setError(
+          saveError instanceof Error
+            ? saveError.message
+            : 'Failed to save results, but here they are.',
+        );
+      } finally {
+        setIsLoading(false);
+      }
+    } else {
+      console.warn('No user ID available, skipping save.');
+      // Optionally set an error or notification if saving is critical
+      // setError("Could not save results: User not identified.");
+    }
+  };
+
+  const handleRestart = () => {
+    setTestConfig(null);
+    setFinalAnswers(null);
+    setError(null);
+    setResultsSteps(null);
+  };
+
+  // Define the handler for when back is pressed on the first step
+  const handleBackToHome = () => {
+    console.log('Navigating back to home from first step.');
+    handleRestart(); // Reset state to show the home screen
+  };
+
+  const renderContent = () => {
+    if (isLoading) {
+      // Use ScreenContainer for consistent background/status bar
+      return (
+        <ScreenContainer contentContainerStyle={styles.centeredContainer}>
+          <ActivityIndicator size="large" color="#fff" />
+        </ScreenContainer>
+      );
+    }
+
+    if (error && !isLoading) {
+      // Use ScreenContainer for consistent background/status bar
+      return (
+        <ScreenContainer contentContainerStyle={styles.centeredContainer}>
+          {/* Provide more context if possible, e.g., "Configuration Error:" */}
+          <Text style={styles.errorText}>{error}</Text>
+          {/* Use StyledButton */}
+          <StyledButton
+            title="Try Again"
+            onPress={handleRestart}
+            style={styles.retryButtonContainer} // Add container style if needed for spacing
+          />
+        </ScreenContainer>
+      );
+    }
+
+    if (finalAnswers) {
+      // ResultsScreen now includes ScreenContainer
+      if (!resultsSteps) {
+        // Error state within results - use ScreenContainer
+        return (
+          <ScreenContainer contentContainerStyle={styles.centeredContainer}>
+            <Text style={styles.errorText}>
+              Error displaying results. Steps missing.
+            </Text>
+            {/* Optionally add a back/restart button here too */}
+          </ScreenContainer>
+        );
+      }
+      return (
+        <ResultsScreen
+          answers={finalAnswers}
+          steps={resultsSteps}
+          onRestart={handleRestart}
+        />
+      );
+    }
+
+    if (testConfig) {
+      // StepFlow likely handles its own container/background, but ensure consistency
+      // If StepFlow doesn't use ScreenContainer, wrap it here or modify StepFlow
+      return (
+        // Assuming StepFlow provides its own SafeArea/Background
+        <StepFlow
+          steps={testConfig}
+          onComplete={handleCompleteRevised}
+          onError={err => setError(err.message)}
+          onBackFromFirst={handleBackToHome}
+        />
+        // Or, if StepFlow needs wrapping:
+        // <ScreenContainer>
+        //   <StepFlow ... />
+        // </ScreenContainer>
+      );
+    }
+
+    // HomeScreen now includes ScreenContainer
+    return <HomeScreen onStartTest={fetchAndStartTest} />;
+  };
+
+  // The top-level return can often just be the renderContent call
+  // as ScreenContainer handles the SafeAreaView now.
+  return renderContent();
+  // Or keep a minimal wrapper if needed for other top-level logic/providers
+  // return <View style={styles.appWrapper}>{renderContent()}</View>;
+};
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
+  // Remove safeArea style if ScreenContainer is used everywhere
+  // appWrapper: { flex: 1 }, // Example if a minimal wrapper is kept
+  centeredContainer: {
+    // Keep flex: 1 from ScreenContainer's inner view
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
   },
+  errorText: {
+    color: '#FF453A', // A standard iOS error red
+    fontSize: 16,
+    marginBottom: 20,
+    textAlign: 'center',
+    paddingHorizontal: 20, // Ensure text doesn't touch edges
+  },
+  // Style for the retry button container (e.g., width constraints)
+  retryButtonContainer: {
+    width: '80%', // Example: constrain width if needed
+    marginTop: 10,
+  },
+  // Remove retryButton and retryButtonText styles
 });
 
 export default App;

@@ -5,9 +5,9 @@
       "question": "What's your preferred development environment?",
       "type": "single",
       "options": [
-        { "id": "vscode", "label": "VS Code" },
-        { "id": "intellij", "label": "IntelliJ" },
-        { "id": "sublime", "label": "Sublime Text" }
+        {"id": "vscode", "label": "VS Code"},
+        {"id": "intellij", "label": "IntelliJ"},
+        {"id": "sublime", "label": "Sublime Text"}
       ]
     },
     {
@@ -15,9 +15,9 @@
       "question": "Which mobile platforms do you develop for?",
       "type": "multi",
       "options": [
-        { "id": "ios", "label": "iOS" },
-        { "id": "android", "label": "Android" },
-        { "id": "both", "label": "Both" }
+        {"id": "ios", "label": "iOS"},
+        {"id": "android", "label": "Android"},
+        {"id": "both", "label": "Both"}
       ]
     }
   ]

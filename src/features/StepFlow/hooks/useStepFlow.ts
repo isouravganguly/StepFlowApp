@@ -1,18 +1,14 @@
-import {useState, useCallback, useRef} from 'react';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import {Step, StepFlowError, StepFlowResult} from './types';
-
-const STORAGE_KEY = '@stepflow_answers';
+import {useState, useCallback} from 'react';
+import {Step, StepFlowError, StepFlowResult} from '../types';
 
 export const useStepFlow = (
   steps: Step[],
   onComplete: (result: StepFlowResult) => void,
   onError?: (error: StepFlowError) => void,
+  onBackFromFirst?: () => void,
 ) => {
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<string, string[]>>({});
-  const [direction, setDirection] = useState<'left' | 'right'>('right');
-  const saveTimeout = useRef<NodeJS.Timeout>(null);
 
   const validateAnswer = (step: Step, selectedOptions: string[]) => {
     const validation = step.validation || {};
@@ -34,31 +30,13 @@ export const useStepFlow = (
     return true;
   };
 
-  const debouncedSave = useCallback(
-    (newAnswers: StepFlowResult) => {
-      if (saveTimeout.current) {
-        clearTimeout(saveTimeout.current);
-      }
-      saveTimeout.current = setTimeout(async () => {
-        try {
-          await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(newAnswers));
-        } catch (error) {
-          onError?.({
-            code: 'STORAGE_ERROR',
-            message: 'Failed to save answers',
-            details: error,
-          });
-        }
-      }, 1000);
-    },
-    [onError],
-  );
-
   const handleOptionSelect = useCallback(
-    async (optionId: string) => {
+    (optionId: string) => {
       setAnswers(currentAnswers => {
         const newAnswers = {...currentAnswers};
         const currentStep = steps[currentStepIndex];
+
+        if (!currentStep) return currentAnswers;
 
         if (currentStep.type === 'single') {
           newAnswers[currentStep.id] = [optionId];
@@ -74,11 +52,13 @@ export const useStepFlow = (
     [currentStepIndex, steps],
   );
 
-  const handleNext = useCallback(async () => {
+  const handleNext = useCallback(() => {
     const currentStep = steps[currentStepIndex];
-    const currentAnswers = answers[currentStep.id] || [];
+    if (!currentStep) return;
 
-    if (!validateAnswer(currentStep, currentAnswers)) {
+    const currentStepAnswers = answers[currentStep.id] || [];
+
+    if (!validateAnswer(currentStep, currentStepAnswers)) {
       onError?.({
         code: 'VALIDATION_ERROR',
         message: 'Please complete the question according to the requirements',
@@ -86,35 +66,28 @@ export const useStepFlow = (
       return;
     }
 
-    setDirection('left');
     if (currentStepIndex < steps.length - 1) {
       setCurrentStepIndex(prev => prev + 1);
     } else {
-      try {
-        await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(answers));
-        onComplete(answers);
-      } catch (error) {
-        onError?.({
-          code: 'STORAGE_ERROR',
-          message: 'Failed to save answers',
-          details: error,
-        });
-      }
+      onComplete(answers);
     }
   }, [currentStepIndex, steps, answers, onComplete, onError]);
 
   const handleBack = useCallback(() => {
-    setDirection('right');
-    setCurrentStepIndex(prev => Math.max(0, prev - 1));
-  }, []);
+    if (currentStepIndex > 0) {
+      setCurrentStepIndex(prev => prev - 1);
+    } else if (onBackFromFirst) {
+      onBackFromFirst();
+    }
+  }, [currentStepIndex, onBackFromFirst]);
 
+  const currentStep = steps[currentStepIndex];
+  const progress = steps.length > 0 ? (currentStepIndex + 1) / steps.length : 0;
   const canGoBack = currentStepIndex > 0;
-  const canGoNext = answers[steps[currentStepIndex]?.id]?.length > 0;
-
-  const progress = (currentStepIndex + 1) / steps.length;
+  const canGoNext = validateAnswer(currentStep, answers[currentStep?.id] || []);
 
   return {
-    currentStep: steps[currentStepIndex],
+    currentStep,
     progress,
     answers,
     handleOptionSelect,
@@ -122,6 +95,5 @@ export const useStepFlow = (
     handleNext,
     canGoBack,
     canGoNext,
-    direction,
   };
 };

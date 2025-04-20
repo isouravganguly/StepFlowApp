@@ -1,8 +1,8 @@
+// StepFlow use-case: This component is used to display the progress bar at the top of the StepFlow screen.
 import React from 'react';
 import {StyleSheet} from 'react-native';
 import Animated, {
   useAnimatedStyle,
-  //   withSpring,
 } from 'react-native-reanimated';
 
 type ProgressBarProps = {

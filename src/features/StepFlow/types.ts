@@ -20,30 +20,24 @@ export type Step = {
 export type StepFlowResult = Record<string, string[]>;
 
 export type StepFlowError = {
-  code: 'STORAGE_ERROR' | 'VALIDATION_ERROR' | 'NAVIGATION_ERROR';
+  code: 'STORAGE_ERROR' | 'VALIDATION_ERROR' | 'NAVIGATION_ERROR'; // Keep relevant codes
   message: string;
   details?: unknown;
 };
+
+// Removed PersistenceError as usePersistence is removed
 
 export type StepFlowProps = {
   steps: Step[];
   onComplete: (result: StepFlowResult) => void;
   onError?: (error: StepFlowError) => void;
-  renderHeader?: (progress: number) => React.ReactNode;
-  renderTile?: (option: Option, isSelected: boolean) => React.ReactNode;
-  renderError?: (error: StepFlowError) => React.ReactNode;
+  onBackFromFirst?: () => void; // Keep this if used
+  // Remove unused render props
+  // renderHeader?: (progress: number) => React.ReactNode;
+  // renderTile?: (option: Option, isSelected: boolean) => React.ReactNode;
+  // renderError?: (error: StepFlowError) => React.ReactNode;
 };
 
-export type AnimationConfig = {
-  initialValues: {
-    transform: Array<{ [key: string]: number }>;
-  };
-  animations: {
-    transform: Array<{ [key: string]: unknown }>;
-  };
-};
-
-export type StepFlowState = {
-  currentStepIndex: number;
-  answers: Record<string, string[]>;
-};
+// Remove unused types
+// export type AnimationConfig = { ... };
+// export type StepFlowState = { ... };
