@@ -1,21 +1,14 @@
 import React, {useState} from 'react';
-import {
-  StyleSheet,
-  ActivityIndicator,
-  Text,
-  // TouchableOpacity, // No longer needed here
-} from 'react-native';
+import {StyleSheet, ActivityIndicator, Text} from 'react-native';
 import StepFlow from './src/features/StepFlow/StepFlow';
 import ResultsScreen from './src/features/Results/ResultsScreen';
 import {stepFlowService} from './src/services/stepFlowService';
-import {Step, StepFlowResult} from './src/components/StepFlow/types';
+import {Step, StepFlowResult} from './src/features/StepFlow/types';
+
 import HomeScreen from './src/screens/HomeScreen';
-// Import new components
 import ScreenContainer from './src/components/common/ScreenContainer';
 import StyledButton from './src/components/common/StyledButton';
 
-// Placeholder User ID - REMOVED - Replace with actual user management later
-// const USER_ID = 'testUser123';
 // TODO: Implement authentication and retrieve actual user ID
 
 // Type for the cache
@@ -167,56 +160,39 @@ const App = () => {
     }
 
     if (testConfig) {
-      // StepFlow likely handles its own container/background, but ensure consistency
-      // If StepFlow doesn't use ScreenContainer, wrap it here or modify StepFlow
       return (
-        // Assuming StepFlow provides its own SafeArea/Background
         <StepFlow
           steps={testConfig}
           onComplete={handleCompleteRevised}
           onError={err => setError(err.message)}
           onBackFromFirst={handleBackToHome}
         />
-        // Or, if StepFlow needs wrapping:
-        // <ScreenContainer>
-        //   <StepFlow ... />
-        // </ScreenContainer>
       );
     }
 
-    // HomeScreen now includes ScreenContainer
     return <HomeScreen onStartTest={fetchAndStartTest} />;
   };
 
-  // The top-level return can often just be the renderContent call
-  // as ScreenContainer handles the SafeAreaView now.
   return renderContent();
-  // Or keep a minimal wrapper if needed for other top-level logic/providers
-  // return <View style={styles.appWrapper}>{renderContent()}</View>;
 };
 
 const styles = StyleSheet.create({
-  // Remove safeArea style if ScreenContainer is used everywhere
-  // appWrapper: { flex: 1 }, // Example if a minimal wrapper is kept
   centeredContainer: {
-    // Keep flex: 1 from ScreenContainer's inner view
     justifyContent: 'center',
     alignItems: 'center',
     padding: 20,
   },
   errorText: {
-    color: '#FF453A', // A standard iOS error red
+    color: '#FF453A',
     fontSize: 16,
     marginBottom: 20,
     textAlign: 'center',
-    paddingHorizontal: 20, // Ensure text doesn't touch edges
+    paddingHorizontal: 20,
   },
-  // Style for the retry button container (e.g., width constraints)
   retryButtonContainer: {
-    width: '80%', // Example: constrain width if needed
+    width: '80%',
     marginTop: 10,
   },
-  // Remove retryButton and retryButtonText styles
 });
 
 export default App;

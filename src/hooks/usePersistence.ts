@@ -2,7 +2,7 @@
 
 import {useState, useCallback} from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {StepFlowResult} from '../types';
+import {StepFlowResult} from '../features/StepFlow/types';
 
 type PersistenceError = {
   code: 'STORAGE_READ' | 'STORAGE_WRITE' | 'PARSE_ERROR';

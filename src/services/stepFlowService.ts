@@ -1,14 +1,11 @@
 import firestore from '@react-native-firebase/firestore';
-import { StepFlowResult, Step } from '../features/StepFlow/types'; // Adjusted path
+import { StepFlowResult, Step } from '../features/StepFlow/types';
 
-// Define constants for collection names
 const TESTS_COLLECTION = 'tests';
 const USER_RESULTS_COLLECTION = 'userResults';
 
-// Define a type for the test configuration document structure
 type TestConfigDoc = {
   config: Step[]; // Assuming the JSON config is an array of Step objects
-  // Add other potential fields if needed
 };
 
 export const stepFlowService = {

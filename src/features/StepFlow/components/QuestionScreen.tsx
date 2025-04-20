@@ -88,7 +88,6 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#1C1C1E',
   },
-  // Style for header containing back button
   header: {
     flexDirection: 'row',
     justifyContent: 'flex-start',
@@ -97,16 +96,13 @@ const styles = StyleSheet.create({
     paddingTop: 10,
     height: 50,
   },
-  // Style for the back button itself
   backButton: {
     padding: 10,
   },
-  // Style for the back arrow text
   backText: {
     color: '#fff',
     fontSize: 24,
   },
-  // Style for disabled Back arrow
   navDisabledText: {
     color: '#555',
   },
@@ -115,41 +111,30 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#fff',
     paddingHorizontal: 20,
-    // Adjust marginBottom if needed
-    marginBottom: 10, // Reduced margin to make space for the new text
+    marginBottom: 10,
     lineHeight: 40,
   },
-  // Style for the new selection type indicator
   selectionType: {
     fontSize: 14,
     fontWeight: '400',
-    color: '#AEAEB2', // A slightly muted gray color
+    color: '#AEAEB2',
     paddingHorizontal: 20,
-    marginBottom: 20, // Space before the options list
-    textAlign: 'left', // Align to the left like the question
+    marginBottom: 20,
+    textAlign: 'left',
   },
   optionsContainer: {
     paddingHorizontal: 20,
-    // Keep or adjust paddingBottom as needed (e.g., 130 from previous fix)
     paddingBottom: 130, // Ensure space for the absolute positioned button
   },
   separator: {
     height: 12,
   },
-  // Style for the button's positioning container
   nextButtonContainer: {
     position: 'absolute',
-    bottom: 30, // Adjust vertical position as needed
-    left: 20, // Add padding from the left edge
-    right: 20, // Add padding from the right edge
-    // Removed width: '100%', justifyContent, alignItems as StyledButton handles centering text
-    // and the container now uses left/right for width control.
+    bottom: 30,
+    left: 20,
+    right: 20,
   },
-  // Remove the nextButton style rule entirely
-  // nextButton: {
-  //   width: '90%', // Removed
-  //   flex: 1,      // Removed
-  // },
 });
 
 export default React.memo(QuestionScreen);

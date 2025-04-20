@@ -25,19 +25,13 @@ export type StepFlowError = {
   details?: unknown;
 };
 
-// Removed PersistenceError as usePersistence is removed
-
 export type StepFlowProps = {
   steps: Step[];
   onComplete: (result: StepFlowResult) => void;
   onError?: (error: StepFlowError) => void;
-  onBackFromFirst?: () => void; // Keep this if used
+  onBackFromFirst?: () => void;
   // Remove unused render props
   // renderHeader?: (progress: number) => React.ReactNode;
   // renderTile?: (option: Option, isSelected: boolean) => React.ReactNode;
   // renderError?: (error: StepFlowError) => React.ReactNode;
 };
-
-// Remove unused types
-// export type AnimationConfig = { ... };
-// export type StepFlowState = { ... };

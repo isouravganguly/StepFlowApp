@@ -3,7 +3,7 @@ import React, {memo} from 'react';
 import {Pressable, Text, StyleSheet} from 'react-native';
 import Animated, {useAnimatedStyle, withSpring} from 'react-native-reanimated';
 
-import {Option} from './types';
+import {Option} from '../types';
 
 type OptionTileProps = {
   option: Option;
